@@ -1,14 +1,17 @@
-from transformers import BertModel, BertTokenizer, pipeline
-import torch
+from simpletransformers.language_representation import RepresentationModel
 
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+
 # Init is ran on server startup
 # Load your model to GPU as a global variable here using the variable name "model"
 def init():
     global model
     
     device = 0 if torch.cuda.is_available() else -1
-    model = BertModel.from_pretrained('bert-base-uncased')
+    model = RepresentationModel(
+        model_type="bert",
+        model_name="bert-base-uncased",
+        use_cuda=True
+    )
 
 # # Inference is ran for every server call
 # # Reference your preloaded global model variable here.
@@ -21,13 +24,9 @@ def inference(model_inputs:dict) -> dict:
         return {'message': "No prompt provided"}
     
     # Run the model
-    input_ids = tokenizer.encode(prompt, add_special_tokens=True)
-    input_ids = torch.tensor([input_ids])
-    with torch.no_grad():
-     last_hidden_states = model(input_ids)[0] # Models outputs are now tuples
-    last_hidden_states = last_hidden_states.mean(1)
-    print(last_hidden_states)
-    # return {last_hidden_states}
+    word_vectors = model.encode_sentences(prompt, combine_strategy=None)
+    
+    return word_vectors
 
 
 
