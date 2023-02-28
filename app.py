@@ -29,7 +29,8 @@ def inference(model_inputs:dict) -> dict:
     # Run the model
     word_vectors = model.encode_sentences(prompt, combine_strategy=None)
     result = word_vectors.flatten('F')
-    return {'data': result}
+    embd = json.dumps(result.tolist())
+    return {'data': embd}
     
 
 
