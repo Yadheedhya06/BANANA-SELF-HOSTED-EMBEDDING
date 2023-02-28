@@ -8,7 +8,7 @@ def init():
     global model
     
     device = 0 if torch.cuda.is_available() else -1
-    model = pipeline('fill-mask', model='bert-base-uncased', device=device)
+    model = BertModel.from_pretrained('bert-base-uncased')
 
 # # Inference is ran for every server call
 # # Reference your preloaded global model variable here.
@@ -26,7 +26,7 @@ def inference(model_inputs:dict) -> dict:
     with torch.no_grad():
      last_hidden_states = model(input_ids)[0] # Models outputs are now tuples
     last_hidden_states = last_hidden_states.mean(1)
-    
+
     return {last_hidden_states}
 
 
