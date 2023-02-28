@@ -18,7 +18,7 @@ def init():
 # # Inference is ran for every server call
 # # Reference your preloaded global model variable here.
 def inference(model_inputs:dict) -> dict:
-    return {'message': "test"}
+    
     global model
 
     # Parse out your arguments
