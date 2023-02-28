@@ -48,8 +48,8 @@ def inference(model_inputs:dict) -> dict:
 
     # result = embeddings.embed_query(prompt)
     # Return the results as a dictionary
-    result = {'output': embeddings.embed_query(prompt)}
-    return result
+    # result = {'output': embeddings.embed_query(prompt)}
+    return {embeddings.embed_query(prompt)}
 
 # if __name__ == "__main__":
 #     init()
