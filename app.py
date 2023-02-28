@@ -28,9 +28,9 @@ def inference(model_inputs:dict) -> dict:
     with torch.no_grad():
         last_hidden_states = model(input_ids)[0] # Models outputs are now tuples
     last_hidden_states = last_hidden_states.mean(1)
-    print(last_hidden_states)
+    # print(last_hidden_states)
 
-    return {"embeddings"}
+    return last_hidden_states
 
 
 
