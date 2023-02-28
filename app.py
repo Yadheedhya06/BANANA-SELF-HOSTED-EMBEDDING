@@ -1,5 +1,6 @@
 from simpletransformers.language_representation import RepresentationModel
 import torch
+import json
 
 
 # Init is ran on server startup
@@ -26,9 +27,9 @@ def inference(model_inputs:dict) -> dict:
     
     # Run the model
     word_vectors = model.encode_sentences(prompt, combine_strategy=None)
-    print(word_vectors)
+    result = json.dumps(word_vectors)
 
-    return word_vectors
+    return result
 
 
 
