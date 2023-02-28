@@ -4,3 +4,4 @@ accelerate
 langchain
 runhouse
 torch
+simpletransformers
