@@ -1,4 +1,5 @@
 from simpletransformers.language_representation import RepresentationModel
+import torch
 
 
 # Init is ran on server startup
@@ -10,7 +11,7 @@ def init():
     model = RepresentationModel(
         model_type="bert",
         model_name="bert-base-uncased",
-        use_cuda=True
+        use_cuda= False
     )
 
 # # Inference is ran for every server call
@@ -26,7 +27,7 @@ def inference(model_inputs:dict) -> dict:
     # Run the model
     word_vectors = model.encode_sentences(prompt, combine_strategy=None)
     
-    return word_vectors
+    return {word_vectors}
 
 
 
