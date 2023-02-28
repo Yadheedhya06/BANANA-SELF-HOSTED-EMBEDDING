@@ -27,9 +27,9 @@ def inference(model_inputs:dict) -> dict:
     
     # Run the model
     word_vectors = model.encode_sentences(prompt, combine_strategy=None)
-    result = json.dumps(word_vectors)
+    # result = json.dumps(word_vectors)
 
-    return result
+    return {"hi"}
 
 
 
