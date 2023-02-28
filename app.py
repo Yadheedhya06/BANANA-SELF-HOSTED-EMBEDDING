@@ -46,9 +46,9 @@ def inference(model_inputs:dict) -> dict:
     model_reqs=["./", "torch", "transformers"],
     inference_fn=inference_fn)
 
-    result = embeddings.embed_query(prompt)
+    # result = embeddings.embed_query(prompt)
     # Return the results as a dictionary
-    # result = {'output': result}
+    result = {'output': embeddings.embed_query(prompt)}
     return result
 
 # if __name__ == "__main__":
