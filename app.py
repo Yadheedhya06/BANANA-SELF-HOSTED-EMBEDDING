@@ -26,8 +26,10 @@ def inference(model_inputs:dict) -> dict:
     
     # Run the model
     word_vectors = model.encode_sentences(prompt, combine_strategy=None)
-    
-    return word_vectors
+    print(word_vectors)
+    result = model(prompt)
+
+    return result
 
 
 
