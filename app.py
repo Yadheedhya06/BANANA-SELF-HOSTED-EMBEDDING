@@ -1,7 +1,40 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-from langchain.embeddings import SelfHostedEmbeddings
-import runhouse as rh
+from transformers import BertModel, BertTokenizer, pipeline
 import torch
+
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+# Init is ran on server startup
+# Load your model to GPU as a global variable here using the variable name "model"
+def init():
+    global model
+    
+    device = 0 if torch.cuda.is_available() else -1
+    model = pipeline('fill-mask', model='bert-base-uncased', device=device)
+
+# # Inference is ran for every server call
+# # Reference your preloaded global model variable here.
+def inference(model_inputs:dict) -> dict:
+    global model
+
+    # Parse out your arguments
+    prompt = model_inputs.get('prompt', None)
+    if prompt == None:
+        return {'message': "No prompt provided"}
+    
+    # Run the model
+    input_ids = tokenizer.encode(prompt, add_special_tokens=True)
+    input_ids = torch.tensor([input_ids])
+    with torch.no_grad():
+     last_hidden_states = model(input_ids)[0] # Models outputs are now tuples
+    last_hidden_states = last_hidden_states.mean(1)
+    
+    return {last_hidden_states}
+
+
+
+# from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+# from langchain.embeddings import SelfHostedEmbeddings
+# import runhouse as rh
+# import torch
 
 
 # gpu = rh.cluster(name="rh-a10x", instance_type="A100:1", use_spot=False)
@@ -22,45 +55,45 @@ import torch
 
 # Init is ran on server startup
 # Load your model to GPU as a global variable here using the variable name "model"
-def init():
-    global model
+# def init():
+#     global model
     
-    device = 0 if torch.cuda.is_available() else -1
-    model = pipeline('fill-mask', model='bert-base-uncased', device=device)
+#     device = 0 if torch.cuda.is_available() else -1
+#     model = pipeline('fill-mask', model='bert-base-uncased', device=device)
 
 
-# Inference is ran for every server call
-# Reference your preloaded global model variable here.
-def inference(model_inputs:dict) -> dict:
-    global model
+# # Inference is ran for every server call
+# # Reference your preloaded global model variable here.
+# def inference(model_inputs:dict) -> dict:
+#     global model
 
-    # Parse out your arguments
-    prompt = model_inputs.get('prompt', None)
-    if prompt == None:
-        return {'message': "No prompt provided"}
+#     # Parse out your arguments
+#     prompt = model_inputs.get('prompt', None)
+#     if prompt == None:
+#         return {'message': "No prompt provided"}
     
-    # Run the model
-    gpu = rh.cluster(name="rh-a10x", instance_type="A100:1", use_spot=False)
-    
-    model_id = "bert-base-uncased"
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForCausalLM.from_pretrained(model_id)
-    pipe =  pipeline("Fill-Mask", model=model, tokenizer=tokenizer)
+#     # Run the model
+#     gpu = rh.cluster(name="rh-a10x", instance_type="A100:1", use_spot=False)
 
-    if isinstance(prompt, list):
-        infr =  [emb[0][-1] for emb in pipeline(prompt)] 
-    infr =  pipeline(prompt)[0][-1]
+#     model_id = "bert-base-uncased"
+#     tokenizer = AutoTokenizer.from_pretrained(model_id)
+#     model = AutoModelForCausalLM.from_pretrained(model_id)
+#     pipe =  pipeline("Fill-Mask", model=model, tokenizer=tokenizer)
 
-    embeddings = SelfHostedEmbeddings(
-    model_load_fn=pipe, 
-    hardware=gpu,
-    model_reqs=["./", "torch", "transformers"],
-    inference_fn=infr)
+#     if isinstance(prompt, list):
+#         infr =  [emb[0][-1] for emb in pipeline(prompt)] 
+#     infr =  pipeline(prompt)[0][-1]
 
-    # result = embeddings.embed_query(prompt)
-    # Return the results as a dictionary
-    # result = {'output': embeddings.embed_query(prompt)}
-    return {embeddings.embed_query(prompt)}
+#     embeddings = SelfHostedEmbeddings(
+#     model_load_fn=pipe, 
+#     hardware=gpu,
+#     model_reqs=["./", "torch", "transformers"],
+#     inference_fn=infr)
+
+#     # result = embeddings.embed_query(prompt)
+#     # Return the results as a dictionary
+#     # result = {'output': embeddings.embed_query(prompt)}
+#     return {embeddings.embed_query(prompt)}
 
 # if __name__ == "__main__":
 #     init()
