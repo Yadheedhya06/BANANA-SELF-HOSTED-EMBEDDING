@@ -1,5 +1,7 @@
-from simpletransformers.language_representation import RepresentationModel
+from transformers import BertModel, BertTokenizer
 import torch
+model_name = 'bert-base-uncased'
+tokenizer = BertTokenizer.from_pretrained(model_name)
 
 
 # Init is ran on server startup
@@ -8,16 +10,12 @@ def init():
     global model
     
     device = 0 if torch.cuda.is_available() else -1
-    model = RepresentationModel(
-        model_type="bert",
-        model_name="bert-base-uncased",
-        use_cuda= False
-    )
-
+    model = BertModel.from_pretrained(model_name)
 # # Inference is ran for every server call
 # # Reference your preloaded global model variable here.
 def inference(model_inputs:dict) -> dict:
     global model
+    global model01
 
     # Parse out your arguments
     prompt = model_inputs.get('prompt', None)
@@ -25,11 +23,14 @@ def inference(model_inputs:dict) -> dict:
         return {'message': "No prompt provided"}
     
     # Run the model
-    word_vectors = model.encode_sentences(prompt, combine_strategy=None)
-    print(word_vectors)
-    result = model(prompt)
+    input_ids = tokenizer.encode(input_text, add_special_tokens=True)
+    input_ids = torch.tensor([input_ids])
+    with torch.no_grad():
+        last_hidden_states = model(input_ids)[0] # Models outputs are now tuples
+    last_hidden_states = last_hidden_states.mean(1)
+    print(last_hidden_states)
 
-    return result
+    return {"embeddings"}
 
 
 
